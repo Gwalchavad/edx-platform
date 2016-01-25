@@ -98,6 +98,9 @@ from .module_render import toc_for_course, get_module_for_descriptor, get_module
 from lang_pref import LANGUAGE_KEY
 from openedx.core.djangoapps.user_api.preferences.api import get_user_preference
 
+from commerce.models import CommerceConfiguration
+from urlparse import urljoin
+
 
 log = logging.getLogger("edx.courseware")
 
@@ -508,7 +511,7 @@ def _index_bulk_op(request, course_key, chapter, section, position):
                     return redirect(reverse('courseware', args=[course.id.to_deprecated_string()]))
                 raise Http404
 
-            ## Allow chromeless operation
+            # Allow chromeless operation
             if section_descriptor.chrome:
                 chrome = [s.strip() for s in section_descriptor.chrome.lower().split(",")]
                 if 'accordion' not in chrome:
@@ -855,6 +858,8 @@ def course_about(request, course_id):
     with modulestore().bulk_operations(course_key):
         permission = get_permission_for_course_about()
         course = get_course_with_access(request.user, permission, course_key)
+        modes = CourseMode.modes_for_course_dict(course_key)
+        config = CommerceConfiguration.current()
 
         if microsite.get_value('ENABLE_MKTG_SITE', settings.FEATURES.get('ENABLE_MKTG_SITE', False)):
             return redirect(reverse('info', args=[course.id.to_deprecated_string()]))
@@ -871,10 +876,9 @@ def course_about(request, course_id):
 
         show_courseware_link = bool(
             (
-                has_access(request.user, 'load', course)
-                and has_access(request.user, 'view_courseware_with_prerequisites', course)
-            )
-            or settings.FEATURES.get('ENABLE_LMS_MIGRATION')
+                has_access(request.user, 'load', course) and
+                has_access(request.user, 'view_courseware_with_prerequisites', course)
+            ) or settings.FEATURES.get('ENABLE_LMS_MIGRATION')
         )
 
         # Note: this is a flow for payment for course registration, not the Verified Certificate flow.
@@ -893,6 +897,18 @@ def course_about(request, course_id):
 
             reg_then_add_to_cart_link = "{reg_url}?course_id={course_id}&enrollment_action=add_to_cart".format(
                 reg_url=reverse('register_user'), course_id=urllib.quote(str(course_id)))
+
+        ecommerce_checkout_link = ''
+        if config.checkout_on_ecommerce_service and not microsite.is_request_in_microsite() and (
+            'professional' in modes or 'no-id-professional' in modes
+        ):
+            mode = modes.get('professional', '') or modes.get('no-id-professional', '')
+
+            ecom_url = urljoin(settings.ECOMMERCE_PUBLIC_URL_ROOT, config.single_course_checkout_page)
+            ecommerce_checkout_link = "%s?sku=%s" % (ecom_url, mode.sku)
+
+            reg_then_add_to_cart_link = "{reg_url}?course_id={course_id}&enrollment_action=add_to_ecomm_cart&checkout_url={checkout_url}".format(
+                reg_url=reverse('register_user'), course_id=urllib.quote(str(course_id)), checkout_url=ecommerce_checkout_link)
 
         course_price = get_cosmetic_display_price(course, registration_price)
         can_add_course_to_cart = _is_shopping_cart_enabled and registration_price
@@ -925,6 +941,8 @@ def course_about(request, course_id):
             'is_cosmetic_price_enabled': settings.FEATURES.get('ENABLE_COSMETIC_DISPLAY_PRICE'),
             'course_price': course_price,
             'in_cart': in_cart,
+            'ecommerce_checkout': config.checkout_on_ecommerce_service,
+            'ecommerce_checkout_link': ecommerce_checkout_link,
             'reg_then_add_to_cart_link': reg_then_add_to_cart_link,
             'show_courseware_link': show_courseware_link,
             'is_course_full': is_course_full,
@@ -1581,8 +1599,7 @@ def financial_assistance_form(request):
             Q(_expiration_datetime__isnull=True) | Q(_expiration_datetime__gt=datetime.now(UTC())),
             course_id=enrollment.course_id,
             mode_slug=CourseMode.VERIFIED
-        ).exists()
-        and enrollment.mode != CourseMode.VERIFIED
+        ).exists() and enrollment.mode != CourseMode.VERIFIED
     ]
     return render_to_response('financial-assistance/apply.html', {
         'header_text': FINANCIAL_ASSISTANCE_HEADER,
