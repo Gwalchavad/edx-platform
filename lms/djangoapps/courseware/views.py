@@ -39,6 +39,7 @@ import survey.utils
 import survey.views
 from certificates import api as certs_api
 from openedx.core.lib.gating import api as gating_api
+from commerce.utils import EcommerceService
 from course_modes.models import CourseMode
 from courseware import grades
 from courseware.access import has_access, has_ccx_coach_role, _adjust_start_date_for_beta_testers
@@ -97,9 +98,6 @@ from .module_render import toc_for_course, get_module_for_descriptor, get_module
 
 from lang_pref import LANGUAGE_KEY
 from openedx.core.djangoapps.user_api.preferences.api import get_user_preference
-
-from commerce.models import CommerceConfiguration
-from urlparse import urljoin
 
 
 log = logging.getLogger("edx.courseware")
@@ -859,7 +857,6 @@ def course_about(request, course_id):
         permission = get_permission_for_course_about()
         course = get_course_with_access(request.user, permission, course_key)
         modes = CourseMode.modes_for_course_dict(course_key)
-        config = CommerceConfiguration.current()
 
         if microsite.get_value('ENABLE_MKTG_SITE', settings.FEATURES.get('ENABLE_MKTG_SITE', False)):
             return redirect(reverse('info', args=[course.id.to_deprecated_string()]))
@@ -899,13 +896,12 @@ def course_about(request, course_id):
                 reg_url=reverse('register_user'), course_id=urllib.quote(str(course_id)))
 
         ecommerce_checkout_link = ''
-        if config.checkout_on_ecommerce_service and not microsite.is_request_in_microsite() and (
+        ecomm_service = EcommerceService()
+        if ecomm_service.is_enabled() and not microsite.is_request_in_microsite() and (
             'professional' in modes or 'no-id-professional' in modes
         ):
             mode = modes.get('professional', '') or modes.get('no-id-professional', '')
-
-            ecom_url = urljoin(settings.ECOMMERCE_PUBLIC_URL_ROOT, config.single_course_checkout_page)
-            ecommerce_checkout_link = "%s?sku=%s" % (ecom_url, mode.sku)
+            ecommerce_checkout_link = "%s?sku=%s" % (ecomm_service.payment_page_url(), mode.sku)
 
             reg_then_add_to_cart_link = "{reg_url}?course_id={course_id}&enrollment_action=add_to_ecomm_cart&checkout_url={checkout_url}".format(
                 reg_url=reverse('register_user'), course_id=urllib.quote(str(course_id)), checkout_url=ecommerce_checkout_link)
@@ -941,7 +937,7 @@ def course_about(request, course_id):
             'is_cosmetic_price_enabled': settings.FEATURES.get('ENABLE_COSMETIC_DISPLAY_PRICE'),
             'course_price': course_price,
             'in_cart': in_cart,
-            'ecommerce_checkout': config.checkout_on_ecommerce_service,
+            'ecommerce_checkout': ecomm_service.is_enabled(),
             'ecommerce_checkout_link': ecommerce_checkout_link,
             'reg_then_add_to_cart_link': reg_then_add_to_cart_link,
             'show_courseware_link': show_courseware_link,
