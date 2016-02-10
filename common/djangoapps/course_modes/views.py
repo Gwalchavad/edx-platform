@@ -134,7 +134,7 @@ class ChooseModeView(View):
                 decimal.Decimal(x.strip())
                 for x in verified_mode.suggested_prices.split(",")
                 if x.strip()
-                ]
+            ]
             context["currency"] = verified_mode.currency.upper()
             context["min_price"] = verified_mode.min_price
             context["verified_name"] = verified_mode.name
@@ -194,7 +194,7 @@ class ChooseModeView(View):
 
         if requested_mode == 'verified':
             amount = request.POST.get("contribution") or \
-                     request.POST.get("contribution-other-amt") or 0
+                request.POST.get("contribution-other-amt") or 0
 
             try:
                 # Validate the amount passed in and force it into two digits

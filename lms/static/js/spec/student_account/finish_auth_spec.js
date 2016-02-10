@@ -131,6 +131,20 @@
                 expect( EnrollmentInterface.enroll ).toHaveBeenCalledWith(COURSE_KEY, '/dashboard');
             });
 
+            it('redirects the user to the ecommerce basket', function() {
+                setFakeQueryParams({
+                    '?enrollment_action': 'add_to_ecomm_cart',
+                    '?course_id': COURSE_KEY,
+                    '?checkout_url': 'ecommerce/basket'
+                });
+
+                ajaxSpyAndInitialize(this);
+
+                // Expect that the view sends the student to the ecommerce basket
+                // specified in the checkout_url query parameter
+                expect( view.redirect ).toHaveBeenCalledWith( 'ecommerce/basket' );
+            });
+
             it('adds a white-label course to the shopping cart on auth complete', function() {
                 // Simulate providing "add to cart" query string params
                 setFakeQueryParams({
