@@ -31,6 +31,7 @@ import shoppingcart
 from certificates import api as certs_api
 from certificates.models import CertificateStatuses, CertificateGenerationConfiguration
 from certificates.tests.factories import GeneratedCertificateFactory
+from commerce.models import CommerceConfiguration
 from course_modes.models import CourseMode
 from course_modes.tests.factories import CourseModeFactory
 from courseware.model_data import set_score
@@ -184,6 +185,7 @@ class ViewsTestCase(ModuleStoreTestCase):
     """
     Tests for views.py methods.
     """
+
     def setUp(self):
         super(ViewsTestCase, self).setUp()
         self.course = CourseFactory.create(display_name=u'teꜱᴛ course')
@@ -231,6 +233,75 @@ class ViewsTestCase(ModuleStoreTestCase):
         response = views.course_about(request, course.id.to_deprecated_string())
         self.assertEqual(response.status_code, 200)
         self.assertIn(in_cart_span, response.content)
+
+    def test_course_about_with_ecommerce(self):
+        # Create an ecommerce configuration
+        checkout_page = '/test_basket/'
+        sku = 'TEST123'
+        CommerceConfiguration.objects.create(
+            checkout_on_ecommerce_service=True,
+            single_course_checkout_page=checkout_page
+        )
+
+        # Prepare the course and request
+        course = CourseFactory.create(org="new", number="unenrolled", display_name="course")
+        CourseModeFactory(mode_slug=CourseMode.PROFESSIONAL, course_id=course.id, sku=sku)
+        request = self.request_factory.get(reverse('about_course', args=[course.id.to_deprecated_string()]))
+
+        # Test for anonymous user
+        request.user = AnonymousUser()
+        mako_middleware_process_request(request)
+        ecommerce_enrollment_link = (
+            '<a href="/register?course_id={}&enrollment_action=add_to_ecomm_cart'
+            '&checkout_url={}?sku={}" class="add-to-cart">'
+        ).format(course.id, checkout_page, sku)
+        response = views.course_about(request, course.id.to_deprecated_string())
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(ecommerce_enrollment_link, response.content)
+
+        # Test for logged in user
+        request.user = self.user
+        mako_middleware_process_request(request)
+        ecommerce_enrollment_link = ('<a href="{}?sku={}" class="add-to-cart">').format(checkout_page, sku)
+        response = views.course_about(request, course.id.to_deprecated_string())
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(ecommerce_enrollment_link, response.content)
+
+    @unittest.skipUnless(settings.FEATURES.get('ENABLE_SHOPPING_CART'), "Shopping Cart not enabled in settings")
+    @patch.dict(settings.FEATURES, {'ENABLE_PAID_COURSE_REGISTRATION': True})
+    def test_course_about_with_ecommerce_and_shopping_cart(self):
+        # Create an ecommerce configuration
+        checkout_page = '/test_basket/'
+        sku = 'TEST123'
+        CommerceConfiguration.objects.create(
+            checkout_on_ecommerce_service=True,
+            single_course_checkout_page=checkout_page
+        )
+        # Prepare the course and request
+        course = CourseFactory.create(org="new", number="unenrolled", display_name="course")
+        CourseModeFactory(mode_slug=CourseMode.PROFESSIONAL, course_id=course.id, sku=sku, min_price=100)
+        request = self.request_factory.get(reverse('about_course', args=[course.id.to_deprecated_string()]))
+
+        # Test for anonymous user
+        request.user = AnonymousUser()
+        mako_middleware_process_request(request)
+        ecommerce_enrollment_link = (
+            '<a href="/register?course_id={}&enrollment_action=add_to_ecomm_cart'
+            '&checkout_url={}?sku={}" class="add-to-cart" id="reg_then_add_to_ecomm_cart">'
+        ).format(course.id, checkout_page, sku)
+        response = views.course_about(request, course.id.to_deprecated_string())
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(ecommerce_enrollment_link, response.content)
+
+        # Test for logged in user
+        request.user = self.user
+        mako_middleware_process_request(request)
+        ecommerce_enrollment_link = (
+            '<a href="{}?sku={}" class="add-to-cart" id="add_to_ecomm_cart">'
+        ).format(checkout_page, sku)
+        response = views.course_about(request, course.id.to_deprecated_string())
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(ecommerce_enrollment_link, response.content)
 
     def test_user_groups(self):
         # depreciated function

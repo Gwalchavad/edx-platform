@@ -902,10 +902,10 @@ def course_about(request, course_id):
             'professional' in modes or 'no-id-professional' in modes
         ):
             mode = modes.get('professional', '') or modes.get('no-id-professional', '')
-            ecommerce_checkout_link = "%s?sku=%s" % (ecomm_service.payment_page_url(), mode.sku)
+            ecommerce_checkout_link = "{}?sku={}" .format(ecomm_service.payment_page_url(), mode.sku)
 
-            reg_then_add_to_cart_link = "{reg_url}?course_id={course_id}&enrollment_action=add_to_ecomm_cart&checkout_url={checkout_url}".format(
-                reg_url=reverse('register_user'), course_id=urllib.quote(str(course_id)), checkout_url=ecommerce_checkout_link)
+            reg_then_add_to_cart_link = "{}?course_id={}&enrollment_action=add_to_ecomm_cart&checkout_url={}".format(
+                reverse('register_user'), urllib.quote(str(course_id)), ecommerce_checkout_link)
 
         course_price = get_cosmetic_display_price(course, registration_price)
         can_add_course_to_cart = _is_shopping_cart_enabled and registration_price
