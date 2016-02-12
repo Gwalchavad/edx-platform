@@ -144,8 +144,10 @@ def courses(request):
     if not settings.FEATURES.get('ENABLE_COURSE_DISCOVERY'):
         courses_list = get_courses(request.user)
 
-        if theming_helpers.get_value("ENABLE_COURSE_SORTING_BY_START_DATE",
-                               settings.FEATURES["ENABLE_COURSE_SORTING_BY_START_DATE"]):
+        if theming_helpers.get_value(
+            "ENABLE_COURSE_SORTING_BY_START_DATE",
+            settings.FEATURES["ENABLE_COURSE_SORTING_BY_START_DATE"]
+        ):
             courses_list = sort_by_start_date(courses_list)
         else:
             courses_list = sort_by_announcement(courses_list)
@@ -893,7 +895,8 @@ def course_about(request, course_id):
                     shoppingcart.models.CourseRegCodeItem.contained_in_order(cart, course_key)
 
             reg_then_add_to_cart_link = "{reg_url}?course_id={course_id}&enrollment_action=add_to_cart".format(
-                reg_url=reverse('register_user'), course_id=urllib.quote(str(course_id)))
+                reg_url=reverse('register_user'), course_id=urllib.quote(str(course_id))
+            )
 
         ecommerce_checkout_link = ''
         mode = ''

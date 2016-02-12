@@ -741,9 +741,9 @@ def dashboard(request):
     ecommerce_service = EcommerceService()
     if ecommerce_service.is_enabled():
         context.update({
-        'use_ecommerce_payment_flow': True,
-        'ecommerce_payment_page': ecommerce_service.payment_page_url(),
-    })
+            'use_ecommerce_payment_flow': True,
+            'ecommerce_payment_page': ecommerce_service.payment_page_url(),
+        })
 
     return render_to_response('dashboard.html', context)
 

@@ -62,6 +62,6 @@ class EcommerceService(object):
 
     def register_then_add_to_cart_path(self, course_id, sku):
         """ Construct the path for a user to register or log in and redirect to the ecommerce checkout page. """
-        return "{}?course_id={}&enrollment_action=add_to_ecomm_chart&checkout_url={}".format(
+        return "{}?course_id={}&enrollment_action=add_to_ecomm_cart&checkout_url={}".format(
             reverse('register_user'), urllib.quote(str(course_id)), self.checkout_page_url(sku)
         )
