@@ -1,8 +1,10 @@
 """Utilities to assist with commerce tasks."""
 import logging
+import urllib
 from urlparse import urljoin
 
 from django.conf import settings
+from django.core.urlresolvers import reverse
 
 from commerce.models import CommerceConfiguration
 from microsite_configuration import microsite
@@ -53,3 +55,13 @@ class EcommerceService(object):
             http://localhost:8002/basket/single_item/
         """
         return urljoin(settings.ECOMMERCE_PUBLIC_URL_ROOT, self.config.single_course_checkout_page)
+
+    def checkout_page_url(self, sku):
+        """ Construct the URL to the ecommerce checkout page and include a product. """
+        return "{}?sku={}".format(self.payment_page_url(), sku)
+
+    def register_then_add_to_cart_path(self, course_id, sku):
+        """ Construct the path for a user to register or log in and redirect to the ecommerce checkout page. """
+        return "{}?course_id={}&enrollment_action=add_to_ecomm_chart&checkout_url={}".format(
+            reverse('register_user'), urllib.quote(str(course_id)), self.checkout_page_url(sku)
+        )

@@ -1,4 +1,5 @@
 """Tests of commerce utilities."""
+from django.core.urlresolvers import reverse
 from django.test import TestCase
 from mock import patch
 
@@ -21,6 +22,7 @@ class AuditLogTests(TestCase):
 
 class EcommerceServiceTests(TestCase):
     """Tests for the EcommerceService helper class."""
+    SKU = 'TESTSKU'
 
     def setUp(self):
         CommerceConfiguration.objects.create(
@@ -44,6 +46,26 @@ class EcommerceServiceTests(TestCase):
 
     @patch('django.conf.settings.ECOMMERCE_PUBLIC_URL_ROOT', 'http://ecommerce_url')
     def test_payment_page_url(self):
-        """Verify that the proper url is returned."""
+        """Verify that the proper URL is returned."""
         url = EcommerceService().payment_page_url()
         self.assertEqual(url, 'http://ecommerce_url/test_basket/')
+
+    @patch('django.conf.settings.ECOMMERCE_PUBLIC_URL_ROOT', 'http://ecommerce_url')
+    def test_checkout_page_url(self):
+        """ Verify the checkout page URL is constructed and returned. """
+        url = EcommerceService().checkout_page_url(self.SKU)
+        expected_url = 'http://ecommerce_url/test_basket/?sku={}'.format(self.SKU)
+        self.assertEqual(url, expected_url)
+
+    @patch('django.conf.settings.ECOMMERCE_PUBLIC_URL_ROOT', 'http://ecommerce_url')
+    def test_register_then_add_to_cart_path(self):
+        """ Verify the register_then_add_to_cart path is constructed and returned. """
+        register_path = reverse('register_user')
+        path = EcommerceService().register_then_add_to_cart_path('course-v1:test+course+id', self.SKU)
+
+        expected_path = (
+            '{}?course_id=course-v1%3Atest%2Bcourse%2Bid'
+            '&enrollment_action=add_to_ecomm_chart'
+            '&checkout_url=http://ecommerce_url/test_basket/?sku={}'
+        ).format(register_path, self.SKU)
+        self.assertEqual(path, expected_path)
