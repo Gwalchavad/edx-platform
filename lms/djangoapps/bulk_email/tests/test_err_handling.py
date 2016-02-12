@@ -16,7 +16,7 @@ from smtplib import SMTPDataError, SMTPServerDisconnected, SMTPConnectError
 
 from bulk_email.models import CourseEmail, SEND_TO_ALL
 from bulk_email.tasks import perform_delegate_email_batches, send_course_email
-from instructor_task.models import InstructorTask
+from lms.djangoapps.instructor_task.models import InstructorTask
 from instructor_task.subtasks import (
     initialize_subtask_info,
     SubtaskStatus,

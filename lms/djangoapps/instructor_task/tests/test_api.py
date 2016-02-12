@@ -26,7 +26,7 @@ from instructor_task.api import (
 )
 
 from instructor_task.api_helper import AlreadyRunningError
-from instructor_task.models import InstructorTask, PROGRESS
+from lms.djangoapps.instructor_task.models import InstructorTask, PROGRESS
 from instructor_task.tests.test_base import (InstructorTaskTestCase,
                                              InstructorTaskCourseTestCase,
                                              InstructorTaskModuleTestCase,

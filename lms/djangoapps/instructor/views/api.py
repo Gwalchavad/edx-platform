@@ -68,7 +68,7 @@ from student.models import (
 )
 import instructor_task.api
 from instructor_task.api_helper import AlreadyRunningError
-from instructor_task.models import ReportStore
+from lms.djangoapps.instructor_task.models import ReportStore
 import instructor.enrollment as enrollment
 from instructor.enrollment import (
     get_user_email_language,

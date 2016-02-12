@@ -26,7 +26,7 @@ from instructor_task.api import (submit_rescore_problem_for_all_students,
                                  submit_rescore_problem_for_student,
                                  submit_reset_problem_attempts_for_all_students,
                                  submit_delete_problem_state_for_all_students)
-from instructor_task.models import InstructorTask
+from lms.djangoapps.instructor_task.models import InstructorTask
 from instructor_task.tasks_helper import upload_grades_csv
 from instructor_task.tests.test_base import (
     InstructorTaskModuleTestCase,

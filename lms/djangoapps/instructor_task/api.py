@@ -12,7 +12,7 @@ from celery.states import READY_STATES
 
 from xmodule.modulestore.django import modulestore
 
-from instructor_task.models import InstructorTask
+from lms.djangoapps.instructor_task.models import InstructorTask
 from instructor_task.tasks import (
     rescore_problem,
     reset_problem_attempts,

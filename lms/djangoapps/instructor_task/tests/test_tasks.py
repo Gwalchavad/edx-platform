@@ -19,7 +19,7 @@ from courseware.models import StudentModule
 from courseware.tests.factories import StudentModuleFactory
 from student.tests.factories import UserFactory, CourseEnrollmentFactory
 
-from instructor_task.models import InstructorTask
+from lms.djangoapps.instructor_task.models import InstructorTask
 from instructor_task.tests.test_base import InstructorTaskModuleTestCase
 from instructor_task.tests.factories import InstructorTaskFactory
 from instructor_task.tasks import (

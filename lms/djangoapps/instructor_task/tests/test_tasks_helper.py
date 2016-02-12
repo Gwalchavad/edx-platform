@@ -32,7 +32,7 @@ from student.models import CourseEnrollment, CourseEnrollmentAllowed, ManualEnro
 from lms.djangoapps.verify_student.tests.factories import SoftwareSecurePhotoVerificationFactory
 from xmodule.modulestore.tests.factories import CourseFactory, ItemFactory
 from xmodule.partitions.partitions import Group, UserPartition
-from instructor_task.models import ReportStore
+from lms.djangoapps.instructor_task.models import ReportStore
 from survey.models import SurveyForm, SurveyAnswer
 from instructor_task.tasks_helper import (
     cohort_students_and_upload,

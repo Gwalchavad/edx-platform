@@ -27,7 +27,7 @@ from xmodule.modulestore.tests.factories import CourseFactory, ItemFactory
 from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 
 from instructor_task.api_helper import encode_problem_and_student_input
-from instructor_task.models import PROGRESS, QUEUING, ReportStore
+from lms.djangoapps.instructor_task.models import PROGRESS, QUEUING, ReportStore
 from instructor_task.tests.factories import InstructorTaskFactory
 from instructor_task.views import instructor_task_status
 

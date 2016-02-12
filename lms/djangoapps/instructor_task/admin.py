@@ -6,7 +6,7 @@ a task.
 
 """
 from django.contrib import admin
-from .models import InstructorTask
+from lms.djangoapps.instructor_task.models import InstructorTask
 
 
 class InstructorTaskAdmin(admin.ModelAdmin):
