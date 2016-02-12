@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 
 from commerce.models import CommerceConfiguration
-from microsite_configuration import microsite
+from openedx.core.djangoapps.theming import helpers
 
 log = logging.getLogger(__name__)
 
@@ -48,7 +48,7 @@ class EcommerceService(object):
 
     def is_enabled(self):
         """ Check if the service is enabled and that it's not a microsite. """
-        return self.config.checkout_on_ecommerce_service and not microsite.is_request_in_microsite()
+        return self.config.checkout_on_ecommerce_service and not helpers.is_request_in_themed_site()
 
     def payment_page_url(self):
         """ Return the URL for the checkout page. Example:

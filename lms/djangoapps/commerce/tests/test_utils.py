@@ -38,7 +38,7 @@ class EcommerceServiceTests(TestCase):
 
     def test_is_enabled_for_microsites(self):
         """Verify that is_enabled() returns false in case of a microsite."""
-        patcher = patch('microsite_configuration.microsite.is_request_in_microsite')
+        patcher = patch('openedx.core.djangoapps.theming.helpers.is_request_in_themed_site')
         patcher.start()
         is_enabled = EcommerceService().is_enabled()
         self.assertFalse(is_enabled)
