@@ -148,8 +148,9 @@ class ChooseModeView(View):
             context["verified_description"] = verified_mode.description
 
             if verified_mode.sku:
-                context["use_ecommerce_payment_flow"] = EcommerceService().is_enabled()
-                context["ecommerce_payment_page"] = EcommerceService().payment_page_url()
+                ecommerce_service = EcommerceService()
+                context["use_ecommerce_payment_flow"] = ecommerce_service.is_enabled()
+                context["ecommerce_payment_page"] = ecommerce_service.payment_page_url()
                 context["sku"] = verified_mode.sku
 
         return render_to_response("course_modes/choose.html", context)

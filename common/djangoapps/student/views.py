@@ -735,10 +735,15 @@ def dashboard(request):
         'nav_hidden': True,
         'course_programs': course_programs,
         'disable_courseware_js': True,
-        'xseries_credentials': xseries_credentials,
-        'use_ecommerce_payment_flow': EcommerceService().is_enabled(),
-        'ecommerce_payment_page': EcommerceService().payment_page_url(),
+        'xseries_credentials': xseries_credentials
     }
+
+    ecommerce_service = EcommerceService()
+    if ecommerce_service.is_enabled():
+        context.update({
+        'use_ecommerce_payment_flow': True,
+        'ecommerce_payment_page': ecommerce_service.payment_page_url(),
+    })
 
     return render_to_response('dashboard.html', context)
 
