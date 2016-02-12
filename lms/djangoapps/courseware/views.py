@@ -1591,11 +1591,11 @@ def financial_assistance_form(request):
     enrolled_courses = [
         {'name': enrollment.course_overview.display_name, 'value': unicode(enrollment.course_id)}
         for enrollment in CourseEnrollment.enrollments_for_user(user).order_by('-created')
-        if CourseMode.objects.filter(
+        if enrollment.mode != CourseMode.VERIFIED and CourseMode.objects.filter(
             Q(_expiration_datetime__isnull=True) | Q(_expiration_datetime__gt=datetime.now(UTC())),
             course_id=enrollment.course_id,
             mode_slug=CourseMode.VERIFIED
-        ).exists() and enrollment.mode != CourseMode.VERIFIED
+        ).exists()
     ]
     return render_to_response('financial-assistance/apply.html', {
         'header_text': FINANCIAL_ASSISTANCE_HEADER,
