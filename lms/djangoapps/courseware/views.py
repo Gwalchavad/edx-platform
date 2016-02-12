@@ -899,9 +899,9 @@ def course_about(request, course_id):
         mode = ''
         ecomm_service = EcommerceService()
         if ecomm_service.is_enabled() and (
-            'professional' in modes or 'no-id-professional' in modes
+            CourseMode.PROFESSIONAL in modes or CourseMode.NO_ID_PROFESSIONAL_MODE in modes
         ):
-            mode = modes.get('professional', '') or modes.get('no-id-professional', '')
+            mode = modes.get(CourseMode.PROFESSIONAL, '') or modes.get(CourseMode.NO_ID_PROFESSIONAL_MODE, '')
             ecommerce_checkout_link = ecomm_service.checkout_page_url(mode.sku)
             reg_then_add_to_cart_link = ecomm_service.register_then_add_to_cart_path(course_id, mode.sku)
 
