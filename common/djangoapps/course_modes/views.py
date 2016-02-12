@@ -38,7 +38,14 @@ class ChooseModeView(View):
     """
 
     @method_decorator(transaction.non_atomic_requests)
-    def dispatch(self, *args, **kwargs):  # pylint: disable=missing-docstring
+    def dispatch(self, *args, **kwargs):
+        """Disable atomicity for the view.
+
+        Otherwise, we'd be unable to commit to the database until the
+        request had concluded; Django will refuse to commit when an
+        atomic() block is active, since that would break atomicity.
+
+        """
         return super(ChooseModeView, self).dispatch(*args, **kwargs)
 
     @method_decorator(login_required)
